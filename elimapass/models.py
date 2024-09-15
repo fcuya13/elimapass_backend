@@ -1,3 +1,57 @@
 from django.db import models
 
-# Create your models here.
+class Tarjeta(models.Model):
+    codigo = models.CharField(max_length=50, primary_key=True)
+    saldo = models.FloatField(null=False)
+    tipo = models.IntegerField(null=False)
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.codigo
+    
+class Usuario(models.Model):
+    dni = models.CharField(max_length=50, primary_key=True)
+    nombres = models.CharField(max_length=100, null=False)
+    apellidos = models.CharField(max_length=100, null=False)
+    email = models.EmailField(max_length=100, null=False)
+    password = models.CharField(max_length=100, null=False)
+
+    def __str__(self):
+        return self.nombres + ' ' + self.apellidos
+    
+class Paradero(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    latitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
+    longitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
+
+    def __str__(self):
+        return self.id
+
+class Ruta(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    nombre = models.CharField(max_length=100, null=False)
+
+    def __str__(self):
+        return self.nombre
+
+
+class ParaderoRuta(models.Model):
+    id_ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE)
+    id_paradero = models.ForeignKey(Paradero, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('id_ruta', 'id_paradero'),)
+
+    def __str__(self):
+        return f'{self.id_paradero.id} - {self.id_ruta.nombre}'
+
+class Bus(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    id_ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE)
+    latitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
+    longitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
+
+    def __str__(self):
+        return self.id
+
+
