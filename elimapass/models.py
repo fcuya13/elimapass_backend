@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 class Tarjeta(models.Model):
@@ -10,7 +11,8 @@ class Tarjeta(models.Model):
         return self.codigo
     
 class Usuario(models.Model):
-    dni = models.CharField(max_length=50, primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    dni = models.CharField(max_length=50, unique=True, null=False)
     nombres = models.CharField(max_length=100, null=False)
     apellidos = models.CharField(max_length=100, null=False)
     email = models.EmailField(max_length=100, null=False)
