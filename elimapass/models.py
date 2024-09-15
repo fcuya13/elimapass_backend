@@ -1,15 +1,6 @@
 import uuid
 from django.db import models
 
-class Tarjeta(models.Model):
-    codigo = models.CharField(max_length=50, primary_key=True)
-    saldo = models.FloatField(null=False)
-    tipo = models.IntegerField(null=False)
-    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.codigo
-    
 class Usuario(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     dni = models.CharField(max_length=50, unique=True, null=False)
@@ -20,6 +11,15 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.nombres + ' ' + self.apellidos
+
+class Tarjeta(models.Model):
+    codigo = models.CharField(max_length=50, primary_key=True)
+    saldo = models.FloatField(null=False)
+    tipo = models.IntegerField(null=False)
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.codigo
     
 class Paradero(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
