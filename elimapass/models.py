@@ -28,6 +28,16 @@ class Paradero(models.Model):
 
     def __str__(self):
         return self.id
+    
+class Recarga(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    fecha_hora = models.DateTimeField(null=False)
+    codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
+    monto_recargado = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    medio_pago = models.CharField(max_length=50, null=False)
+
+    def __str__(self):
+        return f'{self.codigo_tarjeta} - {self.monto_recargado}'
 
 class Ruta(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
@@ -55,5 +65,15 @@ class Bus(models.Model):
 
     def __str__(self):
         return self.id
+
+class Viaje(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    fecha_hora = models.DateTimeField(null=False)
+    precio = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
+    id_bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.id_bus.id} - {self.precio}'
 
 
