@@ -4,7 +4,18 @@ from .models import *
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = '__all__'
+        fields = ('id', 'dni', 'nombres', 'apellidos', 'email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = Usuario(**validated_data)
+        user.set_password(validated_data['password'])  # Encripta la contraseña
+        user.save()
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    dni = serializers.CharField()
+    password = serializers.CharField()
 
 class TarjetaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,3 +51,4 @@ class ViajeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Viaje
         fields = '__all__'
+
