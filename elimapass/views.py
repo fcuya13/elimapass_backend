@@ -1,10 +1,6 @@
 from rest_framework import generics
-from .models import Usuario, Tarjeta, Paradero, Recarga, Ruta, ParaderoRuta, Bus, Viaje
-from .serializer import (
-    UsuarioSerializer, TarjetaSerializer, ParaderoSerializer,
-    RecargaSerializer, RutaSerializer, ParaderoRutaSerializer,
-    BusSerializer, ViajeSerializer
-)
+from .models import *
+from .serializer import *
 
 class UsuarioList(generics.ListCreateAPIView):
     queryset = Usuario.objects.all()

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuario, Tarjeta, Paradero, Recarga, Ruta, ParaderoRuta, Bus, Viaje
+from .models import *
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
