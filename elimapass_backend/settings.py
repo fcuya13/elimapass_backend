@@ -40,9 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'elimapass.apps.ElimapassConfig',
-    'rest_framework'
-    'coreapi'
+    'rest_framework',
+    'coreapi',
     'elimapass'
 ]
 

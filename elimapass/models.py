@@ -17,6 +17,7 @@ class Tarjeta(models.Model):
     saldo = models.FloatField(null=False)
     tipo = models.IntegerField(null=False)
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    limite = models.FloatField(null=True)
 
     def __str__(self):
         return self.codigo
