@@ -1,8 +1,6 @@
 from rest_framework import generics
 from .models import *
 from .serializer import *
-
-# views.py
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import status
 from rest_framework.response import Response
@@ -49,14 +47,6 @@ class TarjetaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Tarjeta.objects.all()
     serializer_class = TarjetaSerializer
 
-class ParaderoList(generics.ListCreateAPIView):
-    queryset = Paradero.objects.all()
-    serializer_class = ParaderoSerializer
-
-class ParaderoDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Paradero.objects.all()
-    serializer_class = ParaderoSerializer
-
 class RecargaList(generics.ListCreateAPIView):
     queryset = Recarga.objects.all()
     serializer_class = RecargaSerializer
@@ -64,30 +54,6 @@ class RecargaList(generics.ListCreateAPIView):
 class RecargaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Recarga.objects.all()
     serializer_class = RecargaSerializer
-
-class RutaList(generics.ListCreateAPIView):
-    queryset = Ruta.objects.all()
-    serializer_class = RutaSerializer
-
-class RutaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Ruta.objects.all()
-    serializer_class = RutaSerializer
-
-class ParaderoRutaList(generics.ListCreateAPIView):
-    queryset = ParaderoRuta.objects.all()
-    serializer_class = ParaderoRutaSerializer
-
-class ParaderoRutaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ParaderoRuta.objects.all()
-    serializer_class = ParaderoRutaSerializer
-
-class BusList(generics.ListCreateAPIView):
-    queryset = Bus.objects.all()
-    serializer_class = BusSerializer
-
-class BusDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Bus.objects.all()
-    serializer_class = BusSerializer
 
 class ViajeList(generics.ListCreateAPIView):
     queryset = Viaje.objects.all()
