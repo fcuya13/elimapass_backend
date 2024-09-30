@@ -24,8 +24,9 @@ class LoginView(APIView):
             password = serializer.validated_data['password']
             try:
                 user = Usuario.objects.get(dni=dni)
-                if check_password(password, user.password):
-                    return Response({"id": user.id, "nombres": user.nombres}, status=status.HTTP_200_OK)
+                #EL CHECK PASSWORD ES PARA COMPARAR CONTRASENA HASHEADA NO RAW
+                if password == user.password:
+                    return Response({"id": user.id, "dni": user.dni, "nombres": user.nombres, "apellidos": user.apellidos, "email": user.email}, status=status.HTTP_200_OK)
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             except Usuario.DoesNotExist:
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
