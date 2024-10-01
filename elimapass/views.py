@@ -28,7 +28,7 @@ class LoginView(APIView):
                     return Response({"id": user.id, "dni": user.dni, "nombres": user.nombres, "apellidos": user.apellidos, "email": user.email}, status=status.HTTP_200_OK)
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             except Usuario.DoesNotExist:
-                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"error": "Usuario no existe"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

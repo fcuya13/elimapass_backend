@@ -6,8 +6,9 @@ class Usuario(models.Model):
     dni = models.CharField(max_length=50, unique=True, null=False)
     nombres = models.CharField(max_length=100, null=False)
     apellidos = models.CharField(max_length=100, null=False)
-    email = models.EmailField(max_length=100, null=False)
+    email = models.EmailField(max_length=100, null=False, unique=True)
     password = models.CharField(max_length=100, null=False)
+    recovery_token = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.nombres + ' ' + self.apellidos
