@@ -68,14 +68,20 @@ class Bus(models.Model):
     def __str__(self):
         return self.id
 
+class Tarifa(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    id_ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE)
+    precio_base = models.FloatField(null=False)
+
+
 class Viaje(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     fecha_hora = models.DateTimeField(null=False)
-    precio = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    id_tarifa = models.ForeignKey(Tarifa, on_delete=models.CASCADE)
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
-    id_bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
+    precio_final = models.FloatField(null=False)
 
     def __str__(self):
-        return f'{self.id_bus.id} - {self.precio}'
+        return f'{self.id_tarifa.id_ruta.nombre} - {self.id_tarifa.precio_base}'
 
 
