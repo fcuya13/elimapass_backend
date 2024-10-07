@@ -35,14 +35,11 @@ class LoginView(APIView):
             password = serializer.validated_data['password']
             try:
                 user = Usuario.objects.get(dni=dni)
+                tarjeta = Tarjeta.objects.get(id_usuario=user)
                 if check_password(password, user.password):
                     return Response({
                         "id": user.id,
-                        "dni": user.dni,
-                        "nombres": user.nombres,
-                        "apellidos": user.apellidos,
-                        "email": user.email,
-                        "tarjeta_id": user.tarjeta.id  
+                        "tarjeta": tarjeta.codigo,
                     }, status=status.HTTP_200_OK)
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             except Usuario.DoesNotExist:
@@ -72,7 +69,7 @@ class ListaViajesPorTarjetaView(APIView):
     def get(self, request, codigo_tarjeta):
         try:
             tarjeta = Tarjeta.objects.get(codigo=codigo_tarjeta)
-            viajes = Viaje.objects.filter(codigo_tarjeta=tarjeta)
+            viajes = Viaje.objects.filter(codigo_tarjeta=tarjeta).order_by("-fecha_hora")[:10]
             
             lista_viajes = [
                 {
