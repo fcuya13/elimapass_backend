@@ -16,4 +16,6 @@ urlpatterns = [
     
     path('viajes/', ViajeList.as_view(), name='viaje-list'),
     path('viajes/<uuid:pk>/', ViajeDetail.as_view(), name='viaje-detail'),
+
+    path('xd', Test.as_view(), name='test')
 ]
