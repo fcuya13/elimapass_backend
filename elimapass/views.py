@@ -9,22 +9,30 @@ from .models import *
 from .serializer import SignUpSerializer, LoginSerializer
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.utils.crypto import get_random_string
 
 class Test(APIView):
     def get (self, request):
         try:
             """
-            1. leer el recovery_token
             2. mandar link /recovery/token por correo si es que está validado dni+correo
             3. crear view que funcione desde internet (?) - picante
             4. reemplazar pwd y borrar token, si el token no existe que te putee
             """
+            ##GENERAR RECOVER TOKEN
+            baseurl = request.build_absolute_uri()
 
+            recovery_token = get_random_string(length=42)
+            usuario.recovery_token = recovery_token
+            usuario.save()
+             
+            ##correo
             email = EmailMessage(
-                'Recuperar contraseña',
-                'EMAIL BODY',
-                settings.EMAIL_HOST_USER, 
-                ["20210773@aloe.ulima.edu.pe"]
+                'Recuperación de Contraseña',
+                f'Sigue este enlace para recuperar tu contraseña: {baseurl}{recovery_token}/',
+                settings.EMAIL_HOST_USER,
+                [usuario.email],
+                fail_silently=False,
             )
             email.send()
         
