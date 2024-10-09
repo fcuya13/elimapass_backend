@@ -11,8 +11,16 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.utils.crypto import get_random_string
 
-class Test(APIView):
-    def get (self, request):
+class RecuperarPassword(APIView):
+    def post (self, request):
+
+        serializer = RecuperarContrasenaSerializer(data=request.data)
+
+        if serializer.is_valid():
+            usuario = Usuario.objects.get(dni=serializer.validated_data['dni'], email=serializer.validated_data['email'])
+            recovery_token = get_random_string(length=32)
+            usuario.recovery_token = recovery_token
+            usuario.save()
         try:
             """
             2. mandar link /recovery/token por correo si es que está validado dni+correo
@@ -20,22 +28,17 @@ class Test(APIView):
             4. reemplazar pwd y borrar token, si el token no existe que te putee
             """
             ##GENERAR RECOVER TOKEN
-            baseurl = request.build_absolute_uri()
-
-            recovery_token = get_random_string(length=42)
-            usuario.recovery_token = recovery_token
-            usuario.save()
-             
+            baseurl = settings.BASE_URL
+            print(baseurl)
             ##correo
             email = EmailMessage(
                 'Recuperación de Contraseña',
-                f'Sigue este enlace para recuperar tu contraseña: {baseurl}{recovery_token}/',
+                f'Sigue este enlace para recuperar tu contraseña: {baseurl}/recovery/{recovery_token}/',
                 settings.EMAIL_HOST_USER,
                 [usuario.email],
-                fail_silently=False,
             )
             email.send()
-        
+            
             return Response(status=status.HTTP_200_OK)
         
         except:
