@@ -3,6 +3,17 @@ from .models import *
 from django.contrib.auth.hashers import make_password
 from random import randint
 
+class RecuperarContrasenaSerializer(serializers.Serializer):
+    dni = serializers.CharField(max_length=50)
+    email = serializers.EmailField()
+
+    def validate(self, attrs):
+        try:
+            usuario = Usuario.objects.get(dni=attrs['dni'], email=attrs['email'])
+        except Usuario.DoesNotExist:
+            raise serializers.ValidationError("No existe un usuario con este DNI y correo.")
+        return attrs
+
 class SignUpSerializer(serializers.ModelSerializer):
 
     num_tarjeta  = serializers.CharField(write_only=True, allow_null=True, required=False)
