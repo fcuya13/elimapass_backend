@@ -10,6 +10,27 @@ from .serializer import SignUpSerializer, LoginSerializer
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.utils.crypto import get_random_string
+from django.shortcuts import get_object_or_404, render
+from .forms import PasswordUpdateForm
+
+class UpdatePasswordView(APIView):
+    def get(self, request, recovery_token):
+        usuario_to_update = get_object_or_404(Usuario, recovery_token=recovery_token)
+        usuario = usuario_to_update
+        form = PasswordUpdateForm()
+        return render(request, 'update_password.html', {'form': form})
+
+    def post(self, request, recovery_token):
+        usuario_to_update = get_object_or_404(Usuario, recovery_token=recovery_token)
+
+        form = PasswordUpdateForm(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['password']
+            usuario_to_update.password = make_password(new_password)
+            usuario_to_update.recovery_token = None
+            usuario_to_update.save()
+            return Response({"message": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RecuperarPassword(APIView):
     def post (self, request):
@@ -22,24 +43,19 @@ class RecuperarPassword(APIView):
             usuario.recovery_token = recovery_token
             usuario.save()
         try:
-            """
-            2. mandar link /recovery/token por correo si es que está validado dni+correo
-            3. crear view que funcione desde internet (?) - picante
-            4. reemplazar pwd y borrar token, si el token no existe que te putee
-            """
             ##GENERAR RECOVER TOKEN
             baseurl = settings.BASE_URL
             print(baseurl)
             ##correo
             email = EmailMessage(
                 'Recuperación de Contraseña',
-                f'Sigue este enlace para recuperar tu contraseña: {baseurl}/recovery/{recovery_token}/',
+                f'Sigue este enlace para recuperar tu contraseña: {baseurl}elimapass/v1/recovery/{recovery_token}/',
                 settings.EMAIL_HOST_USER,
                 [usuario.email],
             )
             email.send()
-            
-            return Response(status=status.HTTP_200_OK)
+
+            return Response({recovery_token}, status=status.HTTP_200_OK)
         
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)

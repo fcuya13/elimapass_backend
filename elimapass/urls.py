@@ -17,5 +17,6 @@ urlpatterns = [
     path('viajes/', ViajeList.as_view(), name='viaje-list'),
     path('viajes/<uuid:pk>/', ViajeDetail.as_view(), name='viaje-detail'),
 
-    path('recovery/', RecuperarPassword.as_view(), name='recuperar-password')
+    path('recovery/', RecuperarPassword.as_view(), name='recuperar-password'),
+    path('recovery/<str:recovery_token>/', UpdatePasswordView.as_view(), name='update-password')
 ]
