@@ -19,4 +19,7 @@ urlpatterns = [
 
     path('recovery/', RecuperarPassword.as_view(), name='recuperar-password'),
     path('recovery/<str:recovery_token>/', UpdatePasswordView.as_view(), name='update-password')
+
+    path('pago/', PaymentView.as_view(), name='pago')
+
 ]
