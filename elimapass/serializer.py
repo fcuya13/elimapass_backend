@@ -24,13 +24,10 @@ class SignUpSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-
         numero_tarjeta = validated_data.pop('num_tarjeta', None)
-
         validated_data['password'] = make_password(validated_data['password'])
         user = Usuario(**validated_data)
         user.save()
-
         if not numero_tarjeta:
             Tarjeta.objects.create(
                 codigo=str(randint(1000000000, 9999999999)),
@@ -39,12 +36,9 @@ class SignUpSerializer(serializers.ModelSerializer):
                 tipo=0,
                 limite=0
             )
-
             return user
-
         if len(numero_tarjeta) != 10:
             raise serializers.ValidationError('Numero de tarjeta invalida')
-
         Tarjeta.objects.create(
             codigo=numero_tarjeta,
             id_usuario=user,
@@ -52,7 +46,6 @@ class SignUpSerializer(serializers.ModelSerializer):
             tipo=0,
             limite=0
         )
-
         return user
 
 class LoginSerializer(serializers.Serializer):

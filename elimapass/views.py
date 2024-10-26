@@ -12,6 +12,9 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404, render
 from .forms import PasswordUpdateForm
+from decimal import Decimal
+from .models import Tarjeta, Tarifa, Viaje
+from datetime import datetime
 
 class UpdatePasswordView(APIView):
     def get(self, request, recovery_token):
@@ -43,10 +46,8 @@ class RecuperarPassword(APIView):
             usuario.recovery_token = recovery_token
             usuario.save()
         try:
-            ##GENERAR RECOVER TOKEN
             baseurl = settings.BASE_URL
             print(baseurl)
-            ##correo
             email = EmailMessage(
                 'Recuperación de Contraseña',
                 f'Sigue este enlace para recuperar tu contraseña: {baseurl}elimapass/v1/recovery/{recovery_token}/',
@@ -80,6 +81,44 @@ class SignUpView(APIView):
             user = serializer.save()
             return Response({"id": user.id, "nombres": user.nombres}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PagarTarifa(APIView):
+    def post(self, request):
+        codigo_tarjeta = request.data.get('codigo_tarjeta')
+        id_tarifa = request.data.get('id_tarifa')
+
+        if not codigo_tarjeta or not id_tarifa:
+            return Response({"error": "Debe proporcionar codigo_tarjeta e id_tarifa."}, status=status.HTTP_400_BAD_REQUEST)
+
+        tarjeta = get_object_or_404(Tarjeta, codigo=codigo_tarjeta)
+        tarifa = get_object_or_404(Tarifa, id=id_tarifa)
+
+        match tarjeta.tipo:
+            case 1:
+                precio_final = tarifa.precio_base / 2  
+            case 2:
+                precio_final = tarifa.precio_base 
+
+        if tarjeta.saldo < precio_final:
+            return Response({"error": "Saldo insuficiente."}, status=status.HTTP_400_BAD_REQUEST)
+
+        tarjeta.saldo -= Decimal(precio_final)
+        tarjeta.save()
+
+        viaje = Viaje.objects.create(
+            fecha_hora=datetime.now(),
+            id_tarifa=tarifa,
+            codigo_tarjeta=tarjeta,
+            precio_final=precio_final
+        )
+        
+        return Response({
+            "mensaje": "Pago realizado con éxito.",
+            "codigo_tarjeta": tarjeta.codigo,
+            "saldo_actual": tarjeta.saldo,
+            "precio_final": precio_final,
+            "viaje_id": viaje.id
+        }, status=status.HTTP_200_OK)
 
 class LoginView(APIView):
     def post(self, request):
