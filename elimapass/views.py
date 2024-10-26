@@ -111,7 +111,6 @@ class PagarTarifa(APIView):
             codigo_tarjeta=tarjeta,
             precio_final=precio_final
         )
-        
         return Response({
             "mensaje": "Pago realizado con éxito.",
             "codigo_tarjeta": tarjeta.codigo,
