@@ -1,5 +1,4 @@
 from rest_framework import generics
-from .models import *
 from .serializer import *
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import status
@@ -18,8 +17,7 @@ from datetime import datetime
 
 class UpdatePasswordView(APIView):
     def get(self, request, recovery_token):
-        usuario_to_update = get_object_or_404(Usuario, recovery_token=recovery_token)
-        usuario = usuario_to_update
+        get_object_or_404(Usuario, recovery_token=recovery_token)
         form = PasswordUpdateForm()
         return render(request, 'update_password.html', {'form': form})
 
@@ -84,28 +82,28 @@ class SignUpView(APIView):
 
 class PagarTarifa(APIView):
     def post(self, request):
-        codigo_tarjeta = request.data.get('codigo_tarjeta')
-        id_tarifa = request.data.get('id_tarifa')
+        codigo_tarjeta = request.data.get('tarjetaId')
+        id_bus = request.data.get('busId')
 
-        if not codigo_tarjeta or not id_tarifa:
+        if not codigo_tarjeta or not id_bus:
             return Response({"error": "Debe proporcionar codigo_tarjeta e id_tarifa."}, status=status.HTTP_400_BAD_REQUEST)
 
         tarjeta = get_object_or_404(Tarjeta, codigo=codigo_tarjeta)
-        tarifa = get_object_or_404(Tarifa, id=id_tarifa)
+        bus = Bus.objects.get(id=id_bus)
+        tarifa = Tarifa.objects.get(id_ruta=bus.id_ruta)
 
-        match tarjeta.tipo:
-            case 1:
-                precio_final = tarifa.precio_base / 2  
-            case 2:
-                precio_final = tarifa.precio_base 
+        precio_final = tarifa.precio_base
+
+        if tarjeta.tipo == 1:
+            precio_final = round(tarifa.precio_base / 2, 2)
 
         if tarjeta.saldo < precio_final:
             return Response({"error": "Saldo insuficiente."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tarjeta.saldo -= Decimal(precio_final)
+        tarjeta.saldo -= precio_final
         tarjeta.save()
 
-        viaje = Viaje.objects.create(
+        Viaje.objects.create(
             fecha_hora=datetime.now(),
             id_tarifa=tarifa,
             codigo_tarjeta=tarjeta,
@@ -113,10 +111,7 @@ class PagarTarifa(APIView):
         )
         return Response({
             "mensaje": "Pago realizado con éxito.",
-            "codigo_tarjeta": tarjeta.codigo,
-            "saldo_actual": tarjeta.saldo,
-            "precio_final": precio_final,
-            "viaje_id": viaje.id
+            "saldo_actual": round(tarjeta.saldo, 2),
         }, status=status.HTTP_200_OK)
 
 class LoginView(APIView):
@@ -203,3 +198,17 @@ class ViajeList(generics.ListCreateAPIView):
 class ViajeDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Viaje.objects.all()
     serializer_class = ViajeSerializer
+
+class BusList(APIView):
+    def get(self, request):
+        queryset = Bus.objects.all()
+
+        lista_buses = [
+            {
+                "id": bus.id,
+                "nombre": bus.id_ruta.nombre
+            }
+        for bus in queryset
+        ]
+
+        return Response(lista_buses)

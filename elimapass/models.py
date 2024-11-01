@@ -44,6 +44,7 @@ class Recarga(models.Model):
 class Ruta(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     nombre = models.CharField(max_length=100, null=False)
+    servicio = models.CharField(max_length=100, null=False)
 
     def __str__(self):
         return self.nombre
@@ -52,6 +53,7 @@ class Ruta(models.Model):
 class ParaderoRuta(models.Model):
     id_ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE)
     id_paradero = models.ForeignKey(Paradero, on_delete=models.CASCADE)
+    sentido_ida = models.BooleanField(default=True)
 
     class Meta:
         unique_together = (('id_ruta', 'id_paradero'),)
@@ -62,8 +64,8 @@ class ParaderoRuta(models.Model):
 class Bus(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     id_ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE)
-    latitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
-    longitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
+    latitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     def __str__(self):
         return self.id

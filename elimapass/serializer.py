@@ -9,7 +9,7 @@ class RecuperarContrasenaSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         try:
-            usuario = Usuario.objects.get(dni=attrs['dni'], email=attrs['email'])
+            Usuario.objects.get(dni=attrs['dni'], email=attrs['email'])
         except Usuario.DoesNotExist:
             raise serializers.ValidationError("No existe un usuario con este DNI y correo.")
         return attrs

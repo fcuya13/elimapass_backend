@@ -18,8 +18,11 @@ urlpatterns = [
     path('viajes/<uuid:pk>/', ViajeDetail.as_view(), name='viaje-detail'),
 
     path('recovery/', RecuperarPassword.as_view(), name='recuperar-password'),
-    path('recovery/<str:recovery_token>/', UpdatePasswordView.as_view(), name='update-password')
+    path('recovery/<str:recovery_token>/', UpdatePasswordView.as_view(), name='update-password'),
 
-    path('pago/', PaymentView.as_view(), name='pago')
+    path('pagar_viaje/', PagarTarifa.as_view(), name='pago'),
+
+    path('buses/', BusList.as_view(), name='bus-list'),
+
 
 ]
