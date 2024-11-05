@@ -59,7 +59,29 @@ class RecuperarPassword(APIView):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-
+class HistorialRecargasView(APIView):
+    def get(self, request, codigo_tarjeta):
+        try:
+            tarjeta = Tarjeta.objects.get(codigo=codigo_tarjeta)
+            recargas = Recarga.objects.filter(codigo_tarjeta=tarjeta).order_by("-fecha_hora")
+            
+            lista_recargas = [
+                {
+                    "id": str(recarga.id),
+                    "fecha": recarga.fecha_hora.isoformat(),
+                    "monto_recargado": str(recarga.monto_recargado),
+                    "medio_pago": recarga.medio_pago,
+                    "codigo_tarjeta": recarga.codigo_tarjeta.codigo
+                }
+                for recarga in recargas
+            ]
+            
+            return Response({
+                "codigo_tarjeta": tarjeta.codigo,
+                "recargas": lista_recargas
+            }, status=status.HTTP_200_OK)
+        except Tarjeta.DoesNotExist:
+            return Response({"error": "Tarjeta no existe"}, status=status.HTTP_404_NOT_FOUND)
 
 class SaldoTarjetaView(APIView):
     def get(self, request, codigo_tarjeta):
