@@ -22,7 +22,7 @@ urlpatterns = [
 
     path('pagar_viaje/', PagarTarifa.as_view(), name='pago'),
 
-    path('recargas/historial/<str:codigo_tarjeta>/', HistorialRecargasView.as_view(), name='historial_recargas'),
+    path('tarjetas/<str:codigo_tarjeta>/recargas/', HistorialRecargasView.as_view(), name='historial_recargas'),
 
     path('buses/', BusList.as_view(), name='bus-list'),
 

@@ -63,15 +63,14 @@ class HistorialRecargasView(APIView):
     def get(self, request, codigo_tarjeta):
         try:
             tarjeta = Tarjeta.objects.get(codigo=codigo_tarjeta)
-            recargas = Recarga.objects.filter(codigo_tarjeta=tarjeta).order_by("-fecha_hora")
+            recargas = Recarga.objects.filter(codigo_tarjeta=tarjeta).order_by("-fecha_hora")[:10]
             
             lista_recargas = [
                 {
                     "id": str(recarga.id),
                     "fecha": recarga.fecha_hora.isoformat(),
-                    "monto_recargado": str(recarga.monto_recargado),
+                    "monto_recargado": recarga.monto_recargado,
                     "medio_pago": recarga.medio_pago,
-                    "codigo_tarjeta": recarga.codigo_tarjeta.codigo
                 }
                 for recarga in recargas
             ]

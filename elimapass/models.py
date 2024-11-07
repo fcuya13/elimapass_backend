@@ -25,11 +25,12 @@ class Tarjeta(models.Model):
     
 class Paradero(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
+    nombre = models.CharField(max_length=100, null=False)
     latitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
     longitud = models.DecimalField(max_digits=9, decimal_places=6, null=False)
 
     def __str__(self):
-        return self.id
+        return self.nombre
     
 class Recarga(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
