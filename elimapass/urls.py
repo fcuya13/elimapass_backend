@@ -26,6 +26,6 @@ urlpatterns = [
 
     path('buses/', BusList.as_view(), name='bus-list'),
     
-     path('recargar/', RecargarTarjetaView.as_view(), name='recargar_tarjeta'),
+    path('recargar/', RecargarTarjetaView.as_view(), name='recargar_tarjeta'),
 
 ]
