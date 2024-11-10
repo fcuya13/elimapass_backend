@@ -2,6 +2,23 @@ from rest_framework import serializers
 from .models import *
 from django.contrib.auth.hashers import make_password
 from random import randint
+from rest_framework import serializers
+from .models import Recarga, Tarjeta
+
+class RecargaSerializer(serializers.Serializer):
+    codigo_tarjeta = serializers.CharField(max_length=50)
+    monto_recargado = serializers.DecimalField(max_digits=10, decimal_places=2)
+    medio_pago = serializers.ChoiceField(choices=['yape', 'tarjeta'])
+
+    def validate(self, data):
+        try:
+            tarjeta = Tarjeta.objects.get(codigo=data['codigo_tarjeta'])
+        except Tarjeta.DoesNotExist:
+            raise serializers.ValidationError("La tarjeta no existe.")
+        if data['monto_recargado'] <= 0:
+            raise serializers.ValidationError("El monto debe ser mayor a 0.")
+
+        return data
 
 class RecuperarContrasenaSerializer(serializers.Serializer):
     dni = serializers.CharField(max_length=50)

@@ -14,6 +14,12 @@ from .forms import PasswordUpdateForm
 from decimal import Decimal
 from .models import Tarjeta, Tarifa, Viaje
 from datetime import datetime
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+from .models import Tarjeta, Recarga
+from .serializer import RecargaSerializer
 
 class UpdatePasswordView(APIView):
     def get(self, request, recovery_token):
@@ -233,3 +239,31 @@ class BusList(APIView):
         ]
 
         return Response(lista_buses)
+    
+class RecargarTarjetaView(APIView):
+    def post(self, request):
+        serializer = RecargaSerializer(data=request.data)
+        if serializer.is_valid():
+            codigo_tarjeta = serializer.validated_data['codigo_tarjeta']
+            monto_recargado = serializer.validated_data['monto_recargado']
+            medio_pago = serializer.validated_data['medio_pago']
+
+            tarjeta = Tarjeta.objects.get(codigo=codigo_tarjeta)
+            tarjeta.saldo += float(monto_recargado) 
+            tarjeta.save()
+
+            recarga = Recarga.objects.create(
+                codigo_tarjeta=tarjeta,
+                fecha_hora=timezone.now(),
+                monto_recargado=monto_recargado,
+                medio_pago=medio_pago
+            )
+
+            return Response({
+                "mensaje": "Recarga realizada con éxito",
+                "tarjeta": tarjeta.codigo,
+                "saldo_actualizado": tarjeta.saldo,
+                "recarga_id": recarga.id
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

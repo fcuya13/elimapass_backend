@@ -25,6 +25,7 @@ urlpatterns = [
     path('tarjetas/<str:codigo_tarjeta>/recargas/', HistorialRecargasView.as_view(), name='historial_recargas'),
 
     path('buses/', BusList.as_view(), name='bus-list'),
-
+    
+     path('recargar/', RecargarTarjetaView.as_view(), name='recargar_tarjeta'),
 
 ]
