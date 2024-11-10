@@ -247,14 +247,15 @@ class RecargarTarjetaView(APIView):
             codigo_tarjeta = serializer.validated_data['codigo_tarjeta']
             monto_recargado = serializer.validated_data['monto_recargado']
             medio_pago = serializer.validated_data['medio_pago']
+            fecha_hora = serializer.validated_data.get('fecha_hora', timezone.now())
 
             tarjeta = Tarjeta.objects.get(codigo=codigo_tarjeta)
-            tarjeta.saldo += float(monto_recargado) 
+            tarjeta.saldo += float(monto_recargado)
             tarjeta.save()
 
             recarga = Recarga.objects.create(
                 codigo_tarjeta=tarjeta,
-                fecha_hora=timezone.now(),
+                fecha_hora=fecha_hora,
                 monto_recargado=monto_recargado,
                 medio_pago=medio_pago
             )
