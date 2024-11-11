@@ -32,6 +32,8 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
+TIME_ZONE = 'America/Lima'
+USE_TZ = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',

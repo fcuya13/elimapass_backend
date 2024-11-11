@@ -9,7 +9,6 @@ class RecargaSerializer(serializers.Serializer):
     codigo_tarjeta = serializers.CharField(max_length=50)
     monto_recargado = serializers.DecimalField(max_digits=10, decimal_places=2)
     medio_pago = serializers.ChoiceField(choices=['yape', 'tarjeta'])
-    fecha_hora = serializers.DateTimeField(required=False)
     
     def validate(self, data):
         try:

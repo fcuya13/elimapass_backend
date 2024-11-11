@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
-
+from django.utils import timezone
+import pytz
 class Usuario(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     dni = models.CharField(max_length=50, unique=True, null=False)
@@ -34,7 +35,7 @@ class Paradero(models.Model):
     
 class Recarga(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    fecha_hora = models.DateTimeField(null=False)
+    fecha_hora = models.DateTimeField(default=lambda: timezone.now().astimezone(pytz.timezone('America/Lima')))
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
     monto_recargado = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     medio_pago = models.CharField(max_length=50, null=False)
