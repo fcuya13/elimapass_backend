@@ -1,3 +1,7 @@
+import json
+from collections import defaultdict
+
+from django.http import JsonResponse
 from rest_framework import generics
 from .serializer import *
 from django.contrib.auth.hashers import make_password, check_password
@@ -33,6 +37,18 @@ class UpdatePasswordView(APIView):
             return Response({"message": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ParaderosRuta(APIView):
+    def get(self, request, codigo_ruta):
+        try:
+            paraderos_ruta = ParaderoRuta.objects.filter(id_ruta__id=codigo_ruta).select_related('id_paradero', 'id_ruta')
+
+            serializer = ParaderoRutaSerializer(paraderos_ruta, many=True)
+
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False,
+                                json_dumps_params=dict(ensure_ascii=False))
+        except Ruta.DoesNotExist:
+            return JsonResponse({'error': 'Ruta no encontrada'}, status=status.HTTP_404_NOT_FOUND)
 class RecuperarPassword(APIView):
     def post (self, request):
 
@@ -196,29 +212,23 @@ class ListaViajesPorTarjetaView(APIView):
         except Tarjeta.DoesNotExist:
             return Response({"error": "Tarjeta no existe"}, status=status.HTTP_404_NOT_FOUND)
 
-class TarjetaList(generics.ListCreateAPIView):
-    queryset = Tarjeta.objects.all()
-    serializer_class = TarjetaSerializer
+class RutaList(APIView):
+    def get(self, request):
+        queryset = Ruta.objects.all().order_by("nombre")
 
-class TarjetaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Tarjeta.objects.all()
-    serializer_class = TarjetaSerializer
+        rutas_por_servicio = defaultdict(list)
 
-class RecargaList(generics.ListCreateAPIView):
-    queryset = Recarga.objects.all()
-    serializer_class = RecargaSerializer
+        for ruta in queryset:
+            rutas_por_servicio[ruta.servicio].append({
+                "id": ruta.id,
+                "nombre": ruta.nombre,
+                "inicio": ruta.inicio,
+                "final": ruta.final
+            })
 
-class RecargaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Recarga.objects.all()
-    serializer_class = RecargaSerializer
+        rutas_agrupadas = dict(rutas_por_servicio)
 
-class ViajeList(generics.ListCreateAPIView):
-    queryset = Viaje.objects.all()
-    serializer_class = ViajeSerializer
-
-class ViajeDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Viaje.objects.all()
-    serializer_class = ViajeSerializer
+        return Response(rutas_agrupadas, status=status.HTTP_200_OK)
 
 class BusList(APIView):
     def get(self, request):
