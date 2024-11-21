@@ -47,6 +47,8 @@ class Ruta(models.Model):
     id = models.CharField(max_length=50, primary_key=True)
     nombre = models.CharField(max_length=100, null=False)
     servicio = models.CharField(max_length=100, null=False)
+    inicio = models.CharField(max_length=100, null=False)
+    final = models.CharField(max_length=100, null=False)
 
     def __str__(self):
         return self.nombre

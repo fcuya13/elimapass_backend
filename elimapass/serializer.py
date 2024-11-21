@@ -70,38 +70,14 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
-class TarjetaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tarjeta
-        fields = '__all__'
-
-class ParaderoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Paradero
-        fields = '__all__'
-
-class RecargaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recarga
-        fields = '__all__'
-
-class RutaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ruta
-        fields = '__all__'
-
 class ParaderoRutaSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(source='id_paradero.id')
+    nombre = serializers.CharField(source='id_paradero.nombre')
+    latitud = serializers.DecimalField(source='id_paradero.latitud', max_digits=9, decimal_places=6)
+    longitud = serializers.DecimalField(source='id_paradero.longitud', max_digits=9, decimal_places=6)
+    sentido_ida = serializers.BooleanField()
+
     class Meta:
         model = ParaderoRuta
-        fields = '__all__'
-
-class BusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bus
-        fields = '__all__'
-
-class ViajeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Viaje
-        fields = '__all__'
+        fields = ['id', 'nombre', 'latitud', 'longitud', 'sentido_ida']
 
