@@ -23,7 +23,7 @@ BASE_URL = 'https://ideal-space-telegram-9pq4vprrrqqhx7qj-8000.app.github.dev/'
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Considerar esto en un extension .env
+# Considerar linea 27 esto en un extension .env
 SECRET_KEY = 'django-insecure-5ev2ow247_w36#po1aue^-fm4gi1n74iug5x%ui0a1w5f!v=wd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
