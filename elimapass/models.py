@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from django.utils import timezone
 import pytz
+from django.core.exceptions import ValidationError
+
 class Usuario(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     dni = models.CharField(max_length=50, unique=True, null=False)
@@ -20,6 +22,8 @@ class Tarjeta(models.Model):
     tipo = models.IntegerField(null=False)
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     limite = models.FloatField(null=True)
+
+    fecha_vencimiento = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.codigo
@@ -87,7 +91,29 @@ class Viaje(models.Model):
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
     precio_final = models.FloatField(null=False)
 
+    bus_id = models.ForeignKey(Bus, on_delete=models.SET_NULL, null=True, blank=True)
+
     def __str__(self):
         return f'{self.id_tarifa.id_ruta.nombre} - {self.id_tarifa.precio_base}'
+
+class Solicitud(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    dni_frontal = models.ImageField(upload_to='solicitudes/dni/', null=False, blank=False)
+    dni_reversa = models.ImageField(upload_to='solicitudes/dni/', null=False, blank=False)
+    carnet_frontal = models.ImageField(upload_to='solicitudes/carnet/', null=False, blank=False)
+    carnet_reversa = models.ImageField(upload_to='solicitudes/carnet/', null=False, blank=False)
+
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
+    codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE, null=True, blank=True)
+
+
+    def clean(self):
+        if not self.id_usuario and not self.codigo_tarjeta:
+            raise ValidationError('Debe asociarse a un usuario o a una tarjeta.')
+        if self.id_usuario and self.codigo_tarjeta:
+            raise ValidationError('No puede asociarse simultáneamente a un usuario y a una tarjeta.')
+
+    def __str__(self):
+        return f'Solicitud de {self.id_usuario or self.codigo_tarjeta}'
 
 
