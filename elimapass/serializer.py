@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from random import randint
 from rest_framework import serializers
 from .models import Recarga, Tarjeta
+from secrets import randbelow 
+
 
 class RecargaSerializer(serializers.Serializer):
     codigo_tarjeta = serializers.CharField(max_length=50)
@@ -54,6 +56,11 @@ class SignUpSerializer(serializers.ModelSerializer):
                 limite=0
             )
             return user
+
+
+
+
+        
         if len(numero_tarjeta) != 10:
             raise serializers.ValidationError('Numero de tarjeta invalida')
         Tarjeta.objects.create(
