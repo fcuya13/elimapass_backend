@@ -29,6 +29,10 @@ urlpatterns = [
 
     path('solicitudes/<str:solicitud_id>/', SolicitudDetailAPIView.as_view(), name='solicitud-detail-accept'),
 
-
-
+    path('dashboard/viajes-por-linea/', viajes_por_linea, name='viajes-por-linea'),
+    path('dashboard/promedio-recarga-por-usuario/', promedio_recarga_por_usuario, name='promedio-recarga-por-usuario'),
+    path('dashboard/promedio-viajes-por-usuario/', promedio_viajes_por_usuario, name='promedio-viajes-por-usuario'),
+    path('dashboard/total-usuarios-registrados/', total_usuarios_registrados, name='total-usuarios-registrados'),
+    path('dashboard/recargas-por-hora/', recargas_por_hora, name='recargas-por-hora'),
+    path('dashboard/medio-pago-mas-usado/', medio_pago_mas_usado, name='medio-pago-mas-usado'),
     ]
