@@ -4,6 +4,8 @@ from collections import defaultdict
 from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework import generics
+from rest_framework.decorators import api_view
+
 from .serializer import *
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import status
@@ -25,6 +27,8 @@ from rest_framework import status
 from django.utils import timezone
 from .models import Tarjeta, Recarga
 from .serializer import RecargaSerializer
+from django.db.models import Count, Avg, Sum
+from django.db.models.functions import TruncHour
 
 class UpdatePasswordView(APIView):
     def get(self, request, recovery_token):
@@ -309,3 +313,46 @@ class SolicitudDetailAPIView(APIView):
         solicitud.estado = 'aceptada' 
         solicitud.save()
         return Response({'message': f'Solicitud con ID {solicitud_id} aceptada exitosamente.'}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def viajes_por_linea(request):
+    fecha = request.GET.get('fecha', timezone.now().date())
+    viajes = Viaje.objects.filter(fecha_hora__date=fecha).values('id_tarifa__id_ruta__nombre') \
+        .annotate(cantidad=Count('id')) \
+        .order_by('id_tarifa__id_ruta__nombre')
+    return Response(viajes)
+
+@api_view(['GET'])
+def promedio_recarga_por_usuario(request):
+    promedio = Recarga.objects.aggregate(promedio=Avg('monto_recargado'))
+    promedio_redondeado = round(promedio['promedio'], 2) if promedio['promedio'] is not None else 0
+    return Response({'cantidad': promedio_redondeado})
+
+@api_view(['GET'])
+def promedio_viajes_por_usuario(request):
+    promedio = Viaje.objects.values('codigo_tarjeta__id_usuario').annotate(promedio=Avg('id')).count()
+    return Response({'cantidad': promedio})
+
+@api_view(['GET'])
+def total_usuarios_registrados(request):
+    usuarios = Usuario.objects.count()
+    return Response({'cantidad': usuarios})
+
+@api_view(['GET'])
+def recargas_por_hora(request):
+    fecha = request.GET.get('fecha', timezone.now().date())
+    recargas = Recarga.objects.filter(fecha_hora__date=fecha).annotate(hora=TruncHour('fecha_hora')) \
+        .values('hora') \
+        .annotate(total=Sum('monto_recargado')) \
+        .order_by('hora')
+    return Response(recargas)
+
+@api_view(['GET'])
+def medio_pago_mas_usado(request):
+    # Obtener datos agregados por medio de pago
+    medios = Recarga.objects.values('medio_pago').annotate(cantidad=Count('id')).order_by('-cantidad')
+
+    # Formatear los datos para que coincidan con el formato esperado
+    data = [{"tipo": medio["medio_pago"], "cantidad": medio["cantidad"]} for medio in medios]
+
+    return Response(data)

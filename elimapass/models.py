@@ -96,6 +96,18 @@ class Viaje(models.Model):
     def __str__(self):
         return f'{self.id_tarifa.id_ruta.nombre} - {self.id_tarifa.precio_base}'
 
+class AdminUsuario(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    dni = models.CharField(max_length=50, unique=True, null=False)
+    nombres = models.CharField(max_length=100, null=False)
+    apellidos = models.CharField(max_length=100, null=False)
+    email = models.EmailField(max_length=100, null=False, unique=True)
+    password = models.CharField(max_length=100, null=False)
+    rol = models.CharField(max_length=20, choices=[('admin', 'Admin'), ('superadmin', 'Superadmin')], default='admin')
+
+    def __str__(self):
+        return self.nombres + ' ' + self.apellidos
+
 class Solicitud(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     dni_frontal = models.ImageField(upload_to='solicitudes/dni/', null=False, blank=False)
@@ -107,6 +119,7 @@ class Solicitud(models.Model):
 
     estado = models.CharField(max_length=20, choices=[('pendiente', 'Pendiente'), ('aceptada', 'Aceptada'), ('rechazada', 'Rechazada')],
         default='pendiente')
+    admin_user = models.ForeignKey(AdminUsuario, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -143,5 +156,3 @@ class Solicitud(models.Model):
 
     def __str__(self):
         return f'Solicitud de {self.codigo_tarjeta}'
-
-
