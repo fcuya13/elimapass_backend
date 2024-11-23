@@ -24,4 +24,11 @@ urlpatterns = [
 
 
     path('rutas/', RutaList.as_view(), name='ruta_list'),
+
+    path('solicitudes/', SolicitudAPIView.as_view(), name='solicitud-list-create'),
+
+    path('solicitudes/<str:solicitud_id>/', SolicitudDetailAPIView.as_view(), name='solicitud-detail-accept'),
+
+
+
     ]
