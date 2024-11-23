@@ -3,7 +3,7 @@ from .models import *
 from django.contrib.auth.hashers import make_password
 from random import randint
 from rest_framework import serializers
-from .models import Recarga, Tarjeta
+from .models import Recarga, Tarjeta, Solicitud
 
 class RecargaSerializer(serializers.Serializer):
     codigo_tarjeta = serializers.CharField(max_length=50)
@@ -80,4 +80,9 @@ class ParaderoRutaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParaderoRuta
         fields = ['id', 'nombre', 'latitud', 'longitud', 'sentido_ida']
+
+class SolicitudSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Solicitud
+        fields = '__all__'
 

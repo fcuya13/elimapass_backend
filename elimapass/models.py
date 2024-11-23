@@ -106,6 +106,8 @@ class Solicitud(models.Model):
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE, null=True, blank=True)
 
+    estado = models.CharField(max_length=20, choices=[('pendiente', 'Pendiente'), ('aceptada', 'Aceptada'), ('rechazada', 'Rechazada')],
+        default='pendiente')
 
     def clean(self):
         if not self.id_usuario and not self.codigo_tarjeta:
