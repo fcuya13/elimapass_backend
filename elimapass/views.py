@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import *
-from .serializer import SignUpSerializer, LoginSerializer
+from .serializer import SignUpSerializer, LoginSerializer, SolicitudSerializer
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.utils.crypto import get_random_string
@@ -170,7 +170,6 @@ class LoginView(APIView):
                     return Response({
                         "id": user.id,
                         "tarjeta": tarjeta.codigo,
-                        "tipo": tarjeta.tipo
                     }, status=status.HTTP_200_OK)
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             except Usuario.DoesNotExist:
@@ -277,3 +276,31 @@ class RecargarTarjetaView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class SolicitudAPIView(APIView):
+    def post(self, request):
+        serializer = SolicitudSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        solicitudes = Solicitud.objects.all()
+        serializer = SolicitudSerializer(solicitudes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SolicitudDetailAPIView(APIView):
+    def get(self, request, solicitud_id):
+        solicitud = get_object_or_404(Solicitud, pk=solicitud_id)
+        serializer = SolicitudSerializer(solicitud)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def post(self, request, solicitud_id):
+        solicitud = get_object_or_404(Solicitud, pk=solicitud_id)
+        solicitud.estado = 'aceptada' 
+        solicitud.save()
+        return Response({'message': f'Solicitud con ID {solicitud_id} aceptada exitosamente.'}, status=status.HTTP_200_OK)
