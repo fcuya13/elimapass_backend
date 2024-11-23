@@ -35,4 +35,5 @@ urlpatterns = [
     path('dashboard/total-usuarios-registrados/', total_usuarios_registrados, name='total-usuarios-registrados'),
     path('dashboard/recargas-por-hora/', recargas_por_hora, name='recargas-por-hora'),
     path('dashboard/medio-pago-mas-usado/', medio_pago_mas_usado, name='medio-pago-mas-usado'),
+    path('dashboard/viajes-por-hora/', viajes_por_hora, name='viajes_por_hora'),
     ]

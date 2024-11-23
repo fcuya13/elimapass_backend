@@ -1,6 +1,8 @@
 import json
 from collections import defaultdict
-
+from datetime import datetime
+from django.db.models import Count
+from django.db.models.functions import ExtractHour
 from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework import generics
@@ -356,3 +358,58 @@ def medio_pago_mas_usado(request):
     data = [{"tipo": medio["medio_pago"], "cantidad": medio["cantidad"]} for medio in medios]
 
     return Response(data)
+
+@api_view(['GET'])
+def viajes_por_hora(request):
+    """
+    Retorna la cantidad de viajes por hora para un día y una ruta específica.
+    """
+    # Obtener parámetros de la solicitud
+    fecha = request.query_params.get('fecha')  # Debe estar en formato 'YYYY-MM-DD'
+    ruta_nombre = request.query_params.get('ruta_nombre')  # Nombre de la ruta
+
+    # Validar los parámetros
+    if not fecha or not ruta_nombre:
+        return Response(
+            {'error': 'Los parámetros "fecha" y "ruta_nombre" son obligatorios.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')  # Convertir a objeto datetime
+    except ValueError:
+        return Response(
+            {'error': 'El parámetro "fecha" debe estar en formato "YYYY-MM-DD".'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validar que la ruta exista
+    try:
+        ruta = Ruta.objects.get(nombre=ruta_nombre)
+    except Ruta.DoesNotExist:
+        return Response({'error': f'La ruta con nombre "{ruta_nombre}" no existe.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Filtrar viajes por fecha y ruta
+    viajes = (
+        Viaje.objects.filter(fecha_hora__date=fecha_obj, id_tarifa__id_ruta=ruta)
+        .annotate(hora=ExtractHour('fecha_hora'))  # Extraer la hora del campo fecha_hora
+        .values('hora')  # Agrupar por hora
+        .annotate(cantidad_viajes=Count('id'))  # Contar los viajes por hora
+        .order_by('hora')  # Ordenar por la hora
+    )
+
+    # Formatear los resultados
+    resultados = [
+        {
+            'hora': hora["hora"],
+            'cantidad_viajes': hora['cantidad_viajes']
+        }
+        for hora in viajes
+    ]
+
+    # Responder con los resultados
+    return Response({
+        'ruta': ruta.nombre,
+        'fecha': fecha,
+        'resultados': resultados
+    }, status=status.HTTP_200_OK)
