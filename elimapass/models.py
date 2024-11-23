@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.db.models import UniqueConstraint
 from django.utils import timezone
 import pytz
 from django.core.exceptions import ValidationError
@@ -39,7 +40,7 @@ class Paradero(models.Model):
     
 class Recarga(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    fecha_hora = models.DateTimeField(default=lambda: timezone.now().astimezone(pytz.timezone('America/Lima')))
+    fecha_hora = models.DateTimeField(default=timezone.now().astimezone(pytz.timezone('America/Lima')))
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
     monto_recargado = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     medio_pago = models.CharField(max_length=50, null=False)
@@ -103,19 +104,19 @@ class Solicitud(models.Model):
     carnet_frontal = models.ImageField(upload_to='solicitudes/carnet/', null=False, blank=False)
     carnet_reversa = models.ImageField(upload_to='solicitudes/carnet/', null=False, blank=False)
 
-    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
-    codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE, null=True, blank=True)
+    codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE, null=False, blank=True)
 
     estado = models.CharField(max_length=20, choices=[('pendiente', 'Pendiente'), ('aceptada', 'Aceptada'), ('rechazada', 'Rechazada')],
         default='pendiente')
 
     def clean(self):
-        if not self.id_usuario and not self.codigo_tarjeta:
-            raise ValidationError('Debe asociarse a un usuario o a una tarjeta.')
-        if self.id_usuario and self.codigo_tarjeta:
-            raise ValidationError('No puede asociarse simultáneamente a un usuario y a una tarjeta.')
+        if not self.codigo_tarjeta:
+            raise ValidationError('Debe asociarse a una tarjeta.')
+
+        if Solicitud.objects.filter(codigo_tarjeta=self.codigo_tarjeta, estado="pendiente").exists():
+            raise ValidationError('Ya existe una solicitud asociada a esta tarjeta.')
 
     def __str__(self):
-        return f'Solicitud de {self.id_usuario or self.codigo_tarjeta}'
+        return f'Solicitud de {self.codigo_tarjeta}'
 
 
