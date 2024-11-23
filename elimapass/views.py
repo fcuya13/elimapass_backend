@@ -157,7 +157,8 @@ class PagarTarifa(APIView):
             fecha_hora=datetime.now(),
             id_tarifa=tarifa,
             codigo_tarjeta=tarjeta,
-            precio_final=precio_final
+            precio_final=precio_final,
+            bus_id=bus
         )
         return Response({
             "mensaje": "Pago realizado con éxito.",

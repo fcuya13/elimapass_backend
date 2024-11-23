@@ -119,7 +119,6 @@ class Solicitud(models.Model):
 
     estado = models.CharField(max_length=20, choices=[('pendiente', 'Pendiente'), ('aceptada', 'Aceptada'), ('rechazada', 'Rechazada')],
         default='pendiente')
-    admin_user = models.ForeignKey(AdminUsuario, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         constraints = [
