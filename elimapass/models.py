@@ -1,9 +1,8 @@
+import os
 import uuid
-from django.db import models
-from django.db.models import UniqueConstraint
+from django.db import models, transaction, IntegrityError
+from django.db.models import UniqueConstraint, Q
 from django.utils import timezone
-import pytz
-from django.core.exceptions import ValidationError
 
 class Usuario(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
@@ -40,7 +39,7 @@ class Paradero(models.Model):
     
 class Recarga(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    fecha_hora = models.DateTimeField(default=timezone.now().astimezone(pytz.timezone('America/Lima')))
+    fecha_hora = models.DateTimeField(default=timezone.now())
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
     monto_recargado = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     medio_pago = models.CharField(max_length=50, null=False)
@@ -109,12 +108,38 @@ class Solicitud(models.Model):
     estado = models.CharField(max_length=20, choices=[('pendiente', 'Pendiente'), ('aceptada', 'Aceptada'), ('rechazada', 'Rechazada')],
         default='pendiente')
 
-    def clean(self):
-        if not self.codigo_tarjeta:
-            raise ValidationError('Debe asociarse a una tarjeta.')
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['codigo_tarjeta'],
+                condition=Q(estado='pendiente'),
+                name='unique_codigo_tarjeta_pendiente'
+            )
+        ]
 
-        if Solicitud.objects.filter(codigo_tarjeta=self.codigo_tarjeta, estado="pendiente").exists():
-            raise ValidationError('Ya existe una solicitud asociada a esta tarjeta.')
+    def delete(self, *args, **kwargs):
+        # Eliminar los archivos asociados antes de eliminar la instancia.
+        self._delete_uploaded_files()
+        super().delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # Usar una transacción para asegurar consistencia.
+        try:
+            with transaction.atomic():
+                super().save(*args, **kwargs)
+        except IntegrityError as e:
+            self._delete_uploaded_files()
+            raise e
+
+    def _delete_uploaded_files(self):
+        """
+        Elimina los archivos subidos si no se guarda la instancia.
+        """
+        fields = ['dni_frontal', 'dni_reversa', 'carnet_frontal', 'carnet_reversa']
+        for field in fields:
+            file = getattr(self, field)
+            if file and os.path.isfile(file.path):  # Verifica que el archivo existe.
+                os.remove(file.path)
 
     def __str__(self):
         return f'Solicitud de {self.codigo_tarjeta}'
