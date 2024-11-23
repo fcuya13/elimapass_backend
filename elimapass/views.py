@@ -310,12 +310,70 @@ class SolicitudDetailAPIView(APIView):
         serializer = SolicitudSerializer(solicitud)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
     def post(self, request, solicitud_id):
+        # Buscar la solicitud
         solicitud = get_object_or_404(Solicitud, pk=solicitud_id)
-        solicitud.estado = 'aceptada' 
+
+        # Validar el estado recibido en el cuerpo de la solicitud
+        estado = request.data.get('estado')
+        if estado not in ['aceptada', 'rechazada']:
+            return Response(
+                {'error': 'El estado debe ser "aceptada" o "rechazada".'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Actualizar el estado
+        solicitud.estado = estado
         solicitud.save()
-        return Response({'message': f'Solicitud con ID {solicitud_id} aceptada exitosamente.'}, status=status.HTTP_200_OK)
+
+        return Response(
+            {'message': f'Solicitud con ID {solicitud_id} actualizada exitosamente a estado "{estado}".'},
+            status=status.HTTP_200_OK
+        )
+
+class AdminLoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            dni = serializer.validated_data['dni']
+            password = serializer.validated_data['password']
+            try:
+                user = AdminUsuario.objects.get(dni=dni)
+                if check_password(password, user.password):
+                    return Response({
+                        "user": user.id,
+                    }, status=status.HTTP_200_OK)
+                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            except Usuario.DoesNotExist:
+                return Response({"error": "Usuario no existe"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminUserRegisterView(APIView):
+    def post(self, request):
+        """
+        Endpoint para registrar un nuevo usuario administrador.
+        """
+        serializer = AdminUsuarioSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+
+            # Encriptar la contraseña
+            data['password'] = make_password(data['password'])
+
+            # Crear el usuario administrador
+            try:
+                admin_user = AdminUsuario.objects.create(**data)
+                return Response(
+                    {"message": "Usuario administrador creado exitosamente", "user_id": admin_user.id},
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                return Response(
+                    {"error": "No se pudo crear el usuario administrador", "details": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def viajes_por_linea(request):

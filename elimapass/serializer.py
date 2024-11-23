@@ -86,3 +86,13 @@ class SolicitudSerializer(serializers.ModelSerializer):
         model = Solicitud
         fields = '__all__'
 
+
+class AdminUsuarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdminUsuario
+        fields = ['dni', 'nombres', 'apellidos', 'email', 'password', 'rol']  # Incluye los campos necesarios
+        extra_kwargs = {
+            'password': {'write_only': True},  # No enviar la contraseña de vuelta en las respuestas
+            'rol': {'default': 'admin'}       # Rol por defecto: admin
+        }
+

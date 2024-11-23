@@ -19,6 +19,8 @@ dotenv.load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_URL = 'https://ideal-space-telegram-9pq4vprrrqqhx7qj-8000.app.github.dev/'
 
+MEDIA_URL = '/solicitudes/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'solicitudes')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
