@@ -398,13 +398,16 @@ def viajes_por_hora(request):
         .order_by('hora')  # Ordenar por la hora
     )
 
-    # Formatear los resultados
+    # Crear un diccionario de horas con valores de cantidad de viajes
+    viajes_dict = {viaje['hora']: viaje['cantidad_viajes'] for viaje in viajes}
+
+    # Generar un resultado con todas las horas de 0 a 23
     resultados = [
         {
-            'hora': hora["hora"],
-            'cantidad_viajes': hora['cantidad_viajes']
+            'hora': hora,
+            'cantidad_viajes': viajes_dict.get(hora, 0)  # Usar el valor de viajes o 0 si no está presente
         }
-        for hora in viajes
+        for hora in range(24)  # Rango de 0 a 23
     ]
 
     # Responder con los resultados
