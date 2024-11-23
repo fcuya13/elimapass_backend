@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 
+from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.decorators import api_view
@@ -287,7 +288,10 @@ class SolicitudAPIView(APIView):
     def post(self, request):
         serializer = SolicitudSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            try:
+                serializer.save()
+            except IntegrityError:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
