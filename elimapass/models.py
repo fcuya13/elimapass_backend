@@ -39,7 +39,7 @@ class Paradero(models.Model):
     
 class Recarga(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    fecha_hora = models.DateTimeField(default=timezone.now())
+    fecha_hora = models.DateTimeField(default=timezone.now)
     codigo_tarjeta = models.ForeignKey(Tarjeta, on_delete=models.CASCADE)
     monto_recargado = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     medio_pago = models.CharField(max_length=50, null=False)

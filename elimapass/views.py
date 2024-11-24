@@ -1,18 +1,10 @@
-import json
 from collections import defaultdict
-from datetime import datetime
-from django.db.models import Count
 from django.db.models.functions import ExtractHour
-from django.db import IntegrityError
 from django.http import JsonResponse
-from rest_framework import generics
 from rest_framework.decorators import api_view
 
 from .serializer import *
 from django.contrib.auth.hashers import make_password, check_password
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from .models import *
 from .serializer import SignUpSerializer, LoginSerializer, SolicitudSerializer
 from django.core.mail import EmailMessage
@@ -20,9 +12,8 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404, render
 from .forms import PasswordUpdateForm
-from decimal import Decimal
-from .models import Tarjeta, Tarifa, Viaje
-from datetime import datetime
+from .models import Tarifa, Viaje
+from datetime import datetime, timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -324,6 +315,9 @@ class SolicitudDetailAPIView(APIView):
 
         # Actualizar el estado
         solicitud.estado = estado
+        tarjeta = solicitud.codigo_tarjeta
+        tarjeta.fecha_vencimiento = timezone.now() + timedelta(days=365)
+        tarjeta.save()
         solicitud.save()
 
         return Response(
